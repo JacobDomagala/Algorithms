@@ -17,12 +17,11 @@ using namespace std;
 */
 
 class Solution {
-	void insertToFirstPossibleIdx(vector<vector<int>>& insertTo, vector<int>& valueToInsert, vector<int>& indeces, int startIdx = 0) {
+	void insertToFirstPossibleIdx(vector<vector<int>>& insertTo, const vector<int>& valueToInsert, int startIdx = 0) {
 		const auto size = insertTo.size();
 		for (int i = startIdx; i < size; ++i) {
-			if (indeces[i] == 1) {
+			if (insertTo[i][0] == -1) {
 				insertTo[i] = valueToInsert;
-				indeces[i] = 0;
 				return;
 			}
 		}
@@ -32,35 +31,31 @@ public:
 	vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
 
 		const auto size = people.size();
-		vector<int> indecesAviable(size, 1);
-		vector<vector<int>> result(size, vector<int>(2, 0));
-
+		vector<vector<int>> result(size, vector<int>(2, -1));
 
 		sort(people.begin(), people.end(), [](const auto& person1, const auto& person2) {
 			return person1[0] < person2[0];
 			});
 
-
-		for (int i = 0; i < size; ++i) {
-			if (people[i][1] == 0) {
-				insertToFirstPossibleIdx(result, people[i], indecesAviable);
+		for (const auto& person : people) {
+			const auto requestedIdx = person[1];
+			if (requestedIdx == 0) {
+				insertToFirstPossibleIdx(result, person);
 			}
 			else {
-				const auto requestedIdx = people[i][1];
-
 				int biggerNumsCnt = 0;
 				int idx = 0;
+
 				while (biggerNumsCnt < requestedIdx) {
-					biggerNumsCnt = indecesAviable[idx] == 1 || result[idx][0] >= people[i][0] ? biggerNumsCnt + 1 : biggerNumsCnt;
+					biggerNumsCnt = result[idx][0] == -1 || result[idx][0] >= person[0] ? biggerNumsCnt + 1 : biggerNumsCnt;
 					++idx;
 				}
 
-				if (indecesAviable[idx] == 1) {
-					result[idx] = people[i];
-					indecesAviable[idx] = 0;
+				if (result[idx][0] == -1) {
+					result[idx] = person;
 				}
 				else {
-					insertToFirstPossibleIdx(result, people[i], indecesAviable, idx + 1);
+					insertToFirstPossibleIdx(result, person, idx + 1);
 				}
 			}
 
